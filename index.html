@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHW TraceX // TITAN DFIR Enterprise Suite v6.0</title>
+<style>
+  :root {
+    --bg-base: #f8fafc;
+    --bg-sidebar: #ffffff;
+    --bg-panel: #ffffff;
+    --bg-card: #ffffff;
+    --bg-hover: #f1f5f9;
+    --border: #e2e8f0;
+    --border-subtle: #cbd5e1;
+    --primary: #0284c7;
+    --primary-dim: #e0f2fe;
+    --success: #059669;
+    --success-dim: #d1fae5;
+    --danger: #e11d48;
+    --danger-dim: #ffe4e6;
+    --warning: #d97706;
+    --warning-dim: #fef3c7;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --sidebar-w: 260px;
+    --sidebar-w-collapsed: 64px;
+    --font-mono: "Consolas", "Courier New", "Liberation Mono", monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ===== HIDDEN WATERMARK — CHW TraceX (copy prevent) ===== */
+  body::before {
+    content: "CHW TraceX // CHW // CHW TraceX // CHW // CHW TraceX // CHW // CHW TraceX // CHW";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: rgba(15, 23, 42, 0.035);
+    pointer-events: none;
+    white-space: pre-wrap;
+    word-break: break-all;
+    z-index: 0;
+    line-height: 1.8;
+    padding: 20px;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    text-align: justify;
+    transform: rotate(-15deg) scale(1.2);
+    transform-origin: center;
+  }
+
+  /* Diagonal watermark layer */
+  body::after {
+    content: "CHW TraceX — CONFIDENTIAL // CHW TraceX — CONFIDENTIAL // CHW TraceX — CONFIDENTIAL";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-25deg);
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 5px;
+    color: rgba(15, 23, 42, 0.04);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  /* ===== COLLAPSIBLE SIDEBAR ===== */
+  aside {
+    width: var(--sidebar-w);
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 20;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+  }
+  aside.collapsed { width: var(--sidebar-w-collapsed); }
+
+  .sidebar-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+  .brand-logo-img { height: 36px; max-width: 100px; object-fit: contain; }
+  .brand-text { display: flex; flex-direction: column; overflow: hidden; }
+  .brand-title { font-size: 13px; font-weight: 800; letter-spacing: 0.5px; color: var(--text-main); white-space: nowrap; }
+  .brand-subtitle { font-size: 10px; color: var(--primary); font-family: var(--font-mono); font-weight: 700; white-space: nowrap; }
+
+  .btn-collapse {
+    background: var(--bg-hover); border: 1px solid var(--border);
+    color: var(--text-muted); width: 26px; height: 26px;
+    border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .btn-collapse:hover { color: var(--primary); border-color: var(--primary); }
+
+  aside.collapsed .brand-text { display: none; }
+  aside.collapsed .brand-logo-img { max-width: 32px; }
+
+  .sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .nav-item:hover { color: var(--text-main); background: var(--bg-hover); }
+  .nav-item.active { color: var(--primary); background: var(--primary-dim); font-weight: 700; }
+  .nav-icon { width: 18px; height: 18px; flex-shrink: 0; fill: currentColor; }
+
+  aside.collapsed .nav-text { display: none; }
+  aside.collapsed .nav-item { justify-content: center; padding: 10px; }
+
+  .sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: #fafafa;
+  }
+  aside.collapsed .sidebar-footer { display: none; }
+
+  .app-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    z-index: 5;
+  }
+
+  header {
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .hud-stats { display: flex; align-items: center; gap: 12px; }
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 4px; font-family: var(--font-mono);
+    font-size: 11px; font-weight: 700; background: var(--bg-hover); border: 1px solid var(--border);
+  }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); }
+  .status-dot.active { background: var(--success); }
+
+  .actions { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    background: #ffffff; color: var(--text-main); border: 1px solid var(--border-subtle);
+    padding: 6px 14px; border-radius: 5px; font-family: var(--font-sans); font-size: 12px;
+    font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    transition: all 0.15s ease; box-shadow: var(--shadow-sm);
+  }
+  .btn:hover { background: var(--bg-hover); border-color: var(--primary); color: var(--primary); }
+  .btn-primary { background: var(--primary); border-color: var(--primary); color: #ffffff; }
+  .btn-primary:hover { background: #0369a1; color: #ffffff; }
+  .btn-danger { background: #ffffff; border-color: #fca5a5; color: var(--danger); }
+  .btn-danger:hover { background: var(--danger-dim); }
+
+  main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+  .view-panel { display: none; }
+  .view-panel.active { display: block; }
+
+  #empty-hero {
+    border: 2px dashed var(--border-subtle); border-radius: 8px; padding: 60px 40px;
+    text-align: center; background: #ffffff; margin: 40px auto; max-width: 760px;
+    box-shadow: var(--shadow-md);
+  }
+  #empty-hero h2 { font-size: 18px; font-weight: 800; color: var(--text-main); margin-bottom: 8px; }
+  #empty-hero p { color: var(--text-muted); font-size: 13px; max-width: 580px; margin: 0 auto 24px auto; }
+
+  .grid-cards {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px; margin-bottom: 18px;
+  }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; box-shadow: var(--shadow-sm);
+  }
+  .card-label { font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+  .card-value { font-size: 16px; font-weight: 800; color: var(--text-main); word-break: break-all; }
+  .card-value.highlight-cyan { color: var(--primary); }
+  .card-value.highlight-mint { color: var(--success); }
+  .card-value.highlight-crimson { color: var(--danger); }
+  .card-value.highlight-amber { color: var(--warning); }
+
+  .table-toolbar {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+    gap: 10px; margin-bottom: 12px; background: #ffffff; padding: 10px 14px;
+    border-radius: 6px; border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+  }
+  .search-box {
+    background: #ffffff; border: 1px solid var(--border); color: var(--text-main);
+    padding: 7px 12px; border-radius: 5px; font-family: var(--font-sans); font-size: 12px; min-width: 260px;
+  }
+  .search-box:focus { outline: none; border-color: var(--primary); }
+  .filter-group { display: flex; gap: 6px; align-items: center; }
+  .badge-btn {
+    background: #ffffff; border: 1px solid var(--border); color: var(--text-muted);
+    padding: 5px 10px; font-family: var(--font-sans); font-size: 11px; font-weight: 600;
+    border-radius: 4px; cursor: pointer;
+  }
+  .badge-btn.active { background: var(--primary-dim); color: var(--primary); border-color: var(--primary); }
+
+  .table-container {
+    background: #ffffff; border: 1px solid var(--border); border-radius: 8px;
+    overflow: auto; max-height: calc(100vh - 240px); box-shadow: var(--shadow-sm);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+  th {
+    background: #f8fafc; color: var(--text-muted); font-family: var(--font-mono);
+    font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 10px 14px;
+    border-bottom: 1px solid var(--border); position: sticky; top: 0; cursor: pointer;
+    user-select: none; white-space: nowrap; z-index: 2;
+  }
+  th:hover { color: var(--primary); }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: var(--text-main); vertical-align: middle; }
+  tr:hover td { background: var(--bg-hover); }
+  .mono { font-family: var(--font-mono); }
+
+  .pill {
+    display: inline-block; padding: 2px 7px; border-radius: 4px; font-family: var(--font-mono);
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+  }
+  .pill-mint { background: var(--success-dim); color: var(--success); border: 1px solid #a7f3d0; }
+  .pill-crimson { background: var(--danger-dim); color: var(--danger); border: 1px solid #fecdd3; }
+  .pill-amber { background: var(--warning-dim); color: var(--warning); border: 1px solid #fde68a; }
+  .pill-cyan { background: var(--primary-dim); color: var(--primary); border: 1px solid #bae6fd; }
+  .pill-dim { background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border); }
+
+  .terminal-box {
+    background: #f8fafc; border: 1px solid var(--border); border-radius: 6px;
+    padding: 14px; font-family: var(--font-mono); font-size: 12px; line-height: 1.6;
+    color: #334155; white-space: pre-wrap; overflow-x: auto; max-height: calc(100vh - 250px);
+  }
+
+  .modal-backdrop {
+    display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(2px); z-index: 1000;
+    align-items: center; justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-window {
+    background: #ffffff; border: 1px solid var(--border); border-radius: 8px;
+    width: 90%; max-width: 760px; max-height: 85vh; display: flex; flex-direction: column;
+    box-shadow: var(--shadow-md);
+  }
+  .modal-header {
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-title { font-size: 14px; font-weight: 800; color: var(--text-main); font-family: var(--font-mono); }
+  .modal-body { padding: 18px 20px; overflow-y: auto; font-size: 13px; }
+  .modal-close { background: transparent; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; }
+
+  .mobile-bottom-bar { display: none; }
+  @media (max-width: 768px) {
+    aside { display: none; }
+    .mobile-bottom-bar {
+      display: flex; position: fixed; bottom: 0; left: 0; width: 100%; height: 56px;
+      background: #ffffff; border-top: 1px solid var(--border);
+      justify-content: space-around; align-items: center; z-index: 100;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+    }
+    .mobile-nav-btn {
+      background: transparent; border: none; color: var(--text-muted);
+      display: flex; flex-direction: column; align-items: center; font-size: 10px;
+      font-family: var(--font-sans); font-weight: 600; gap: 3px; cursor: pointer;
+    }
+    .mobile-nav-btn.active { color: var(--primary); }
+    main { padding-bottom: 70px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <img src="https://iili.io/fU82tG2.png" alt="CHW TraceX" class="brand-logo-img" onerror="this.style.display='none'">
+      <div class="brand-text">
+        <span class="brand-title">CHW TraceX</span>
+        <span class="brand-subtitle">// TITAN DFIR v6.0</span>
+      </div>
+    </div>
+    <button class="btn-collapse" onclick="toggleSidebar()" title="Toggle Sidebar">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+    </button>
+  </div>
+
+  <div class="sidebar-nav">
+    <button class="nav-item active" onclick="switchTab('overview')">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      <span class="nav-text">Case Overview</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('browser')">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      <span class="nav-text">Browser Forensics</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('hardware')">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M15 7v4h1v2h-3V5h2l-3-4-3 4h2v8H8v-2.07c.7-.37 1.2-1.08 1.2-1.93 0-1.21-.99-2.2-2.2-2.2-1.21 0-2.2.99-2.2 2.2 0 .85.5 1.56 1.2 1.93V13c0 1.11.89 2 2 2h3v3.05c-.71.37-1.2 1.1-1.2 1.95 0 1.22.99 2.2 2.2 2.2 1.21 0 2.2-.98 2.2-2.2 0-.85-.49-1.58-1.2-1.95V15h3c1.11 0 2-.89 2-2v-2h1V7h-4z"/></svg>
+      <span class="nav-text">USB & Peripherals</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('disks')">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M2 20h20v-4H2v4zm2-3h2v2H4v-2zM2 4v4h20V4H2zm4 3H4V5h2v2zm-4 7h20v-4H2v4zm2-3h2v2H4v-2z"/></svg>
+      <span class="nav-text">Dual Boot SSDs & Disks</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('commands')">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8h16v10zm-12-3l3.5-3.5L8 8l1.41-1.41L14.33 11.5l-4.92 4.91L8 15zm7 0h4v2h-4v-2z"/></svg>
+      <span class="nav-text">Command History</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('processes')">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+      <span class="nav-text">Processes & Threats</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('network')">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      <span class="nav-text">Network & IPv4/IPv6 Geo</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('email')">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      <span class="nav-text">Email Artifacts</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('users')">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      <span class="nav-text">Users & Credentials</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('persistence')">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      <span class="nav-text">Registry & Services</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('events')">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+      <span class="nav-text">Event Logs</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('integrity')">
+      <svg class="nav-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+      <span class="nav-text">SHA-256 Integrity</span>
+    </button>
+  </div>
+
+  <div class="sidebar-footer">
+    <span style="font-size:10px; font-family:var(--font-mono); color:var(--text-muted); text-align:center;">
+      CHW TraceX<br>ENTERPRISE v6.0
+    </span>
+  </div>
+</aside>
+
+<!-- MAIN CONTAINER -->
+<div class="app-container">
+  <header>
+    <div class="hud-stats">
+      <div class="status-badge" id="hud-case-status">
+        <span class="status-dot" id="hud-dot"></span>
+        <span id="hud-case-text">STANDBY // NO CASE LOADED</span>
+      </div>
+      <div class="status-badge">
+        <span>INTEGRITY:</span>
+        <span id="hud-integrity-status" class="mono text-muted">PENDING</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="triggerDirSelect()">
+        <svg style="width:14px; height:14px; fill:currentColor;" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+        Load Case Folder
+      </button>
+      <button class="btn" onclick="triggerFileSelect()">Select Files</button>
+      <button class="btn btn-danger" id="btn-unload" onclick="confirmUnloadCase()" style="display:none;">Unload Case</button>
+      <input type="file" id="dirInput" webkitdirectory directory multiple style="display:none" onchange="handleFileSelect(event)">
+      <input type="file" id="fileInput" multiple style="display:none" onchange="handleFileSelect(event)">
+    </div>
+  </header>
+
+  <main id="dropZone">
+    <div id="empty-hero">
+      <h2>CHW TraceX — DFIR ENTERPRISE TRIAGE CONSOLE</h2>
+      <p>Load the forensic triage folder generated by <code>CHW_Forensic_Collector.bat</code>. Data is cached locally in IndexedDB and survives browser reloads.</p>
+      <button class="btn btn-primary" style="padding:8px 18px;" onclick="triggerDirSelect()">Browse & Load Case Folder</button>
+    </div>
+
+    <div id="view-overview" class="view-panel">
+      <div class="grid-cards" id="overview-metrics"></div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-label">ACQUISITION METADATA & CHAIN OF CUSTODY</div>
+        <div id="overview-meta-table"></div>
+      </div>
+    </div>
+
+    <div id="view-browser" class="view-panel">
+      <div class="grid-cards">
+        <div class="card"><div class="card-label">RECOVERED VISITS</div><div class="card-value highlight-cyan" id="count-b-visits">0</div></div>
+        <div class="card"><div class="card-label">SEARCH ENGINE QUERIES</div><div class="card-value highlight-mint" id="count-b-searches">0</div></div>
+        <div class="card"><div class="card-label">RECOVERED DOWNLOADS</div><div class="card-value highlight-crimson" id="count-b-downloads">0</div></div>
+        <div class="card"><div class="card-label">SAVED BOOKMARKS</div><div class="card-value highlight-amber" id="count-b-bookmarks">0</div></div>
+      </div>
+
+      <div class="table-toolbar">
+        <input type="text" class="search-box" id="b-search" placeholder="Search visits, search queries, downloads..." oninput="filterBrowserSub()">
+        <div class="filter-group">
+          <button class="badge-btn active" id="btn-sub-bv" onclick="switchBrowserSub('visits')">Visits (<span id="b-badge-visits">0</span>)</button>
+          <button class="badge-btn" id="btn-sub-bs" onclick="switchBrowserSub('searches')">Search Queries (<span id="b-badge-searches">0</span>)</button>
+          <button class="badge-btn" id="btn-sub-bd" onclick="switchBrowserSub('downloads')">Downloads (<span id="b-badge-downloads">0</span>)</button>
+          <button class="badge-btn" id="btn-sub-bm" onclick="switchBrowserSub('bookmarks')">Bookmarks (<span id="b-badge-bookmarks">0</span>)</button>
+        </div>
+      </div>
+
+      <div id="sub-b-visits" class="table-container">
+        <table id="table-b-visits">
+          <thead><tr><th onclick="sortTable('table-b-visits', 0)">Visit Timestamp</th><th onclick="sortTable('table-b-visits', 1)">Browser</th><th onclick="sortTable('table-b-visits', 2)">Target URL</th><th onclick="sortTable('table-b-visits', 3)">Artifact Source</th></tr></thead>
+          <tbody id="tbody-b-visits"></tbody>
+        </table>
+      </div>
+
+      <div id="sub-b-searches" class="table-container" style="display:none;">
+        <table id="table-b-searches">
+          <thead><tr><th onclick="sortTable('table-b-searches', 0)">Timestamp</th><th onclick="sortTable('table-b-searches', 1)">Search Engine</th><th onclick="sortTable('table-b-searches', 2)">Recovered Search Query</th><th>Full Search URL</th></tr></thead>
+          <tbody id="tbody-b-searches"></tbody>
+        </table>
+      </div>
+
+      <div id="sub-b-downloads" class="table-container" style="display:none;">
+        <table id="table-b-downloads">
+          <thead><tr><th onclick="sortTable('table-b-downloads', 0)">Timestamp</th><th onclick="sortTable('table-b-downloads', 1)">Browser / Source</th><th onclick="sortTable('table-b-downloads', 2)">Downloaded File</th><th onclick="sortTable('table-b-downloads', 3)">Threat Classification</th><th>Download Source URL</th></tr></thead>
+          <tbody id="tbody-b-downloads"></tbody>
+        </table>
+      </div>
+
+      <div id="sub-b-bookmarks" class="table-container" style="display:none;">
+        <table id="table-b-bookmarks">
+          <thead><tr><th onclick="sortTable('table-b-bookmarks', 0)">Browser</th><th onclick="sortTable('table-b-bookmarks', 1)">Bookmark Title</th><th>URL</th></tr></thead>
+          <tbody id="tbody-b-bookmarks"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-hardware" class="view-panel">
+      <div class="grid-cards" id="power-wifi-cards"></div>
+      <div class="card-label" style="margin-top:14px; margin-bottom:8px;">ALL CONNECTED PERIPHERALS (MICE, KEYBOARDS, USB STORAGE)</div>
+      <div class="table-container">
+        <table id="usb-table">
+          <thead><tr><th>Class</th><th>Device Name</th><th>Description / Friendly Name</th><th>Device Identifier (Instance ID)</th><th>Status</th></tr></thead>
+          <tbody id="usb-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-disks" class="view-panel">
+      <div class="card-label" style="margin-bottom:8px;">PHYSICAL DRIVES, SECONDARY BOOT SSDS & PARTITIONS</div>
+      <div class="table-container">
+        <table id="disks-table">
+          <thead><tr><th>Physical Disk</th><th>Drive Model</th><th>Size (GB)</th><th>Interface</th><th>Partition Name</th><th>Type</th><th>Boot Partition</th><th>Serial Number</th></tr></thead>
+          <tbody id="disks-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-commands" class="view-panel">
+      <div class="table-toolbar">
+        <input type="text" class="search-box" id="cmd-search" placeholder="Filter executed commands..." oninput="filterCommands()">
+        <span class="mono" style="font-size:11px; color:var(--text-muted);">HISTORICAL COMMANDS: <span id="count-cmds">0</span></span>
+      </div>
+      <div class="table-container">
+        <table id="cmd-table">
+          <thead><tr><th>User</th><th>Artifact Source</th><th>Executed Command Line</th></tr></thead>
+          <tbody id="cmd-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-processes" class="view-panel">
+      <div class="table-toolbar">
+        <input type="text" class="search-box" id="proc-search" placeholder="Filter processes..." oninput="filterProcesses()">
+        <div class="filter-group">
+          <button class="badge-btn active" id="btn-proc-all" onclick="setProcFilter('all')">All (<span id="c-proc-all">0</span>)</button>
+          <button class="badge-btn" id="btn-proc-crit" onclick="setProcFilter('critical')">Critical (<span id="c-proc-crit">0</span>)</button>
+          <button class="badge-btn" id="btn-proc-high" onclick="setProcFilter('high')">High Risk (<span id="c-proc-high">0</span>)</button>
+        </div>
+      </div>
+      <div class="table-container">
+        <table id="proc-table">
+          <thead><tr><th onclick="sortTable('proc-table', 0)">PID</th><th onclick="sortTable('proc-table', 1)">PPID</th><th onclick="sortTable('proc-table', 2)">Threat Level</th><th onclick="sortTable('proc-table', 3)">Process Name</th><th onclick="sortTable('proc-table', 4)">Executable Path</th><th onclick="sortTable('proc-table', 5)">Owner</th><th onclick="sortTable('proc-table', 6, true)">Memory (MB)</th><th>Payload</th></tr></thead>
+          <tbody id="proc-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-network" class="view-panel">
+      <div class="table-toolbar">
+        <input type="text" class="search-box" id="net-search" placeholder="Filter IP, port, process..." oninput="filterNetwork()">
+        <div class="filter-group">
+          <button class="badge-btn active" id="btn-net-all" onclick="setNetProto('all')">All (<span id="c-net-all">0</span>)</button>
+          <button class="badge-btn" id="btn-net-v4" onclick="setNetProto('ipv4')">IPv4 (<span id="c-net-v4">0</span>)</button>
+          <button class="badge-btn" id="btn-net-v6" onclick="setNetProto('ipv6')">IPv6 (<span id="c-net-v6">0</span>)</button>
+          <button class="badge-btn" id="btn-net-listen" onclick="setNetProto('listen')">Listening (<span id="c-net-listen">0</span>)</button>
+        </div>
+      </div>
+      <div class="table-container">
+        <table id="net-table">
+          <thead><tr><th>Proto</th><th>Local Address</th><th>Port</th><th>Remote Address</th><th>Port</th><th>State</th><th>Process</th><th>IPv4 / IPv6 GeoLocation & ISP Provider</th></tr></thead>
+          <tbody id="net-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-email" class="view-panel">
+      <div class="card-label" style="margin-bottom:8px;">DISCOVERED EMAIL CLIENT DATA STORES (OUTLOOK OST/PST, THUNDERBIRD)</div>
+      <div class="table-container">
+        <table id="email-table">
+          <thead><tr><th>Client</th><th>File Type</th><th>Database File Name</th><th>Size (MB)</th><th>Local File Path</th><th>Last Modified</th></tr></thead>
+          <tbody id="email-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-users" class="view-panel">
+      <div class="card-label" style="margin-bottom:8px;">LOCAL ACCOUNTS & PASSWORD POLICIES AUDIT</div>
+      <div class="table-container">
+        <table id="users-table">
+          <thead><tr><th>Username</th><th>Domain</th><th>SID</th><th>Disabled</th><th>Password Required</th><th>Password Last Set</th></tr></thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-persistence" class="view-panel">
+      <div class="table-toolbar">
+        <input type="text" class="search-box" id="persist-search" placeholder="Filter Run Keys and Services..." oninput="filterPersistence()">
+        <div class="filter-group">
+          <button class="badge-btn active" id="btn-sub-r" onclick="switchPersistSub('run')">Registry Run Keys (<span id="c-run">0</span>)</button>
+          <button class="badge-btn" id="btn-sub-s" onclick="switchPersistSub('svc')">Services (<span id="c-svc">0</span>)</button>
+        </div>
+      </div>
+      <div id="sub-persist-run" class="table-container">
+        <table id="run-table">
+          <thead><tr><th>Registry Hive</th><th>Entry Name</th><th>Command Path</th></tr></thead>
+          <tbody id="run-tbody"></tbody>
+        </table>
+      </div>
+      <div id="sub-persist-svc" class="table-container" style="display:none;">
+        <table id="svc-table">
+          <thead><tr><th>Service Name</th><th>Display Name</th><th>State</th><th>Start Mode</th><th>Binary Path</th></tr></thead>
+          <tbody id="svc-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-events" class="view-panel">
+      <div class="table-toolbar">
+        <input type="text" class="search-box" id="evt-search" placeholder="Search event logs..." oninput="filterEvents()">
+      </div>
+      <div class="table-container">
+        <table id="evt-table">
+          <thead><tr><th>Timestamp</th><th>Channel</th><th>ID</th><th>Level</th><th>Provider</th><th>Message Summary</th><th>Detail</th></tr></thead>
+          <tbody id="evt-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="view-integrity" class="view-panel">
+      <div id="integrity-banner" style="margin-bottom:12px;"></div>
+      <div class="table-container">
+        <table id="integrity-table">
+          <thead><tr><th>Artifact Path</th><th>Size</th><th>Manifest SHA-256</th><th>Calculated SHA-256</th><th>Status</th></tr></thead>
+          <tbody id="integrity-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MOBILE BOTTOM BAR -->
+<div class="mobile-bottom-bar">
+  <button class="mobile-nav-btn active" onclick="switchTab('overview')">
+    <svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+    <span>Overview</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="switchTab('browser')">
+    <svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+    <span>Browser</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="switchTab('hardware')">
+    <svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24"><path d="M15 7v4h1v2h-3V5h2l-3-4-3 4h2v8H8v-2.07c.7-.37 1.2-1.08 1.2-1.93 0-1.21-.99-2.2-2.2-2.2-1.21 0-2.2.99-2.2 2.2 0 .85.5 1.56 1.2 1.93V13c0 1.11.89 2 2 2h3v3.05c-.71.37-1.2 1.1-1.2 1.95 0 1.22.99 2.2 2.2 2.2 1.21 0 2.2-.98 2.2-2.2 0-.85-.49-1.58-1.2-1.95V15h3c1.11 0 2-.89 2-2v-2h1V7h-4z"/></svg>
+    <span>USB</span>
+  </button>
+  <button class="mobile-nav-btn" onclick="switchTab('network')">
+    <svg style="width:18px; height:18px; fill:currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+    <span>Network</span>
+  </button>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="detailModal">
+  <div class="modal-window">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">INSPECTION</div>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+   CHW TraceX — APPLICATION STATE & INDEXEDDB
+   ============================================================================ */
+let caseData = {
+  meta: {}, os: {}, pwrNet: {}, disks: [], usb: [], commands: [], processes: [],
+  services: [], sockets: [], email: [], users: [], runs: [], bVisits: [],
+  bSearches: [], bDownloads: [], bBookmarks: [], events: [], manifest: []
+};
+
+let rawFilesMap = new Map();
+let currentNetProto = 'all';
+let currentProcFilter = 'all';
+let currentBrowserSub = 'visits';
+
+const DB_NAME = 'CHW_TRACEX_V6';
+const DB_STORE = 'ActiveCaseStore';
+
+function initIndexedDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(DB_STORE)) db.createObjectStore(DB_STORE, { keyPath: 'id' });
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function saveCaseToStorage() {
+  try {
+    const db = await initIndexedDB();
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    tx.objectStore(DB_STORE).put({ id: 'active_session', data: caseData });
+  } catch (e) {}
+}
+
+async function loadCaseFromStorage() {
+  try {
+    const db = await initIndexedDB();
+    const tx = db.transaction(DB_STORE, 'readonly');
+    const req = tx.objectStore(DB_STORE).get('active_session');
+    req.onsuccess = () => {
+      if (req.result && req.result.data && req.result.data.meta && req.result.data.meta['Case Identifier']) {
+        caseData = req.result.data;
+        renderAllViews();
+        document.getElementById('empty-hero').style.display = 'none';
+        document.getElementById('btn-unload').style.display = 'inline-flex';
+        updateHUDActive();
+      }
+    };
+  } catch (e) {}
+}
+
+async function confirmUnloadCase() {
+  if (confirm('Unload active triage case and clear cached memory?')) {
+    try {
+      const db = await initIndexedDB();
+      const tx = db.transaction(DB_STORE, 'readwrite');
+      tx.objectStore(DB_STORE).delete('active_session');
+    } catch(e) {}
+    window.location.reload();
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadCaseFromStorage);
+
+/* ============================================================================
+   UI NAVIGATION
+   ============================================================================ */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+
+  const target = document.getElementById('view-' + tabId);
+  if (target) target.classList.add('active');
+
+  const navMatch = Array.from(document.querySelectorAll('.nav-item')).find(b => b.getAttribute('onclick')?.includes("'" + tabId + "'"));
+  if (navMatch) navMatch.classList.add('active');
+
+  const mobMatch = Array.from(document.querySelectorAll('.mobile-nav-btn')).find(b => b.getAttribute('onclick')?.includes("'" + tabId + "'"));
+  if (mobMatch) mobMatch.classList.add('active');
+}
+
+function triggerDirSelect() { document.getElementById('dirInput').click(); }
+function triggerFileSelect() { document.getElementById('fileInput').click(); }
+
+/* ============================================================================
+   FILE INGESTION
+   ============================================================================ */
+function handleFileSelect(event) {
+  const files = Array.from(event.target.files);
+  if (files && files.length > 0) processLoadedFiles(files);
+}
+
+const dropZone = document.body;
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); });
+dropZone.addEventListener('drop', async (e) => {
+  e.preventDefault(); e.stopPropagation();
+  const items = e.dataTransfer.items;
+  const files = [];
+  if (items && items.length > 0) {
+    const queue = [];
+    for (let i = 0; i < items.length; i++) {
+      const entry = items[i].webkitGetAsEntry ? items[i].webkitGetAsEntry() : null;
+      if (entry) queue.push(traverseEntry(entry));
+      else if (items[i].kind === 'file') files.push(items[i].getAsFile());
+    }
+    const resolved = await Promise.all(queue);
+    files.push(...resolved.flat());
+  } else if (e.dataTransfer.files) {
+    files.push(...Array.from(e.dataTransfer.files));
+  }
+  if (files.length > 0) processLoadedFiles(files);
+});
+
+async function traverseEntry(entry) {
+  if (entry.isFile) return new Promise(res => entry.file(res));
+  if (entry.isDirectory) {
+    const reader = entry.createReader();
+    return new Promise(res => {
+      reader.readEntries(async entries => {
+        const promises = entries.map(traverseEntry);
+        const nested = await Promise.all(promises);
+        res(nested.flat());
+      });
+    });
+  }
+  return [];
+}
+
+async function processLoadedFiles(files) {
+  rawFilesMap.clear();
+  for (const f of files) {
+    const relPath = f.webkitRelativePath ? f.webkitRelativePath.split('/').slice(1).join('/') : f.name;
+    rawFilesMap.set(f.name, f);
+    rawFilesMap.set(relPath, f);
+  }
+
+  document.getElementById('empty-hero').style.display = 'none';
+  document.getElementById('btn-unload').style.display = 'inline-flex';
+
+  if (rawFilesMap.has('Case_Information.txt')) parseCaseInfo(await rawFilesMap.get('Case_Information.txt').text());
+  if (rawFilesMap.has('Operating_System.json')) { try { caseData.os = JSON.parse(await rawFilesMap.get('Operating_System.json').text()); } catch(e){} }
+  if (rawFilesMap.has('Power_Network_Interfaces.json')) { try { caseData.pwrNet = JSON.parse(await rawFilesMap.get('Power_Network_Interfaces.json').text()); } catch(e){} }
+  if (rawFilesMap.has('Physical_Disks_Boot_Drives.csv')) caseData.disks = parseCSV(await rawFilesMap.get('Physical_Disks_Boot_Drives.csv').text());
+  if (rawFilesMap.has('USB_All_Connected_Devices.csv')) caseData.usb = parseCSV(await rawFilesMap.get('USB_All_Connected_Devices.csv').text());
+  if (rawFilesMap.has('Recent_Commands_History.csv')) caseData.commands = parseCSV(await rawFilesMap.get('Recent_Commands_History.csv').text());
+  if (rawFilesMap.has('Processes.csv')) caseData.processes = parseCSV(await rawFilesMap.get('Processes.csv').text());
+  if (rawFilesMap.has('Services.csv')) caseData.services = parseCSV(await rawFilesMap.get('Services.csv').text());
+  if (rawFilesMap.has('Network_Connections.csv')) caseData.sockets = parseCSV(await rawFilesMap.get('Network_Connections.csv').text());
+  if (rawFilesMap.has('Registry_Persistence.csv')) caseData.runs = parseCSV(await rawFilesMap.get('Registry_Persistence.csv').text());
+  if (rawFilesMap.has('User_Accounts_Security.csv')) caseData.users = parseCSV(await rawFilesMap.get('User_Accounts_Security.csv').text());
+  if (rawFilesMap.has('Email_Client_Artifacts.csv')) caseData.email = parseCSV(await rawFilesMap.get('Email_Client_Artifacts.csv').text());
+  if (rawFilesMap.has('Event_Logs.json')) { try { caseData.events = JSON.parse(await rawFilesMap.get('Event_Logs.json').text()); } catch(e){} }
+  if (rawFilesMap.has('Browser_History.csv')) caseData.bVisits = parseCSV(await rawFilesMap.get('Browser_History.csv').text());
+  if (rawFilesMap.has('Browser_Searches.csv')) caseData.bSearches = parseCSV(await rawFilesMap.get('Browser_Searches.csv').text());
+  if (rawFilesMap.has('Browser_Downloads.csv')) caseData.bDownloads = parseCSV(await rawFilesMap.get('Browser_Downloads.csv').text());
+  if (rawFilesMap.has('Browser_Bookmarks.csv')) caseData.bBookmarks = parseCSV(await rawFilesMap.get('Browser_Bookmarks.csv').text());
+
+  renderAllViews();
+  saveCaseToStorage();
+
+  if (rawFilesMap.has('SHA256_Manifest.csv')) {
+    caseData.manifest = parseCSV(await rawFilesMap.get('SHA256_Manifest.csv').text());
+    await verifyIntegrity();
+  }
+
+  switchTab('overview');
+}
+
+function renderAllViews() {
+  updateHUDActive();
+  renderOverview();
+  renderBrowser();
+  renderHardware();
+  renderDisks();
+  renderCommands();
+  renderProcesses();
+  renderNetwork();
+  renderEmail();
+  renderUsers();
+  renderPersistence();
+  renderEvents();
+}
+
+function updateHUDActive() {
+  const caseId = caseData.meta['Case Identifier'] || 'ACTIVE_SESSION';
+  document.getElementById('hud-case-text').textContent = 'ACTIVE: ' + caseId;
+  document.getElementById('hud-dot').className = 'status-dot active';
+}
+
+/* ============================================================================
+   CSV PARSER
+   ============================================================================ */
+function parseCSV(text) {
+  if (!text || text.trim() === '') return [];
+  const lines = [];
+  let row = [''];
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    const next = text[i + 1];
+    if (c === '"') {
+      if (inQuotes && next === '"') { row[row.length - 1] += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (c === ',' && !inQuotes) row.push('');
+    else if ((c === '\r' || c === '\n') && !inQuotes) {
+      if (c === '\r' && next === '\n') i++;
+      if (row.length > 1 || row[0] !== '') lines.push(row);
+      row = [''];
+    } else row[row.length - 1] += c;
+  }
+  if (row.length > 1 || row[0] !== '') lines.push(row);
+  if (lines.length === 0) return [];
+  const headers = lines[0].map(h => h.trim().replace(/^"|"$/g, ''));
+  const result = [];
+  for (let j = 1; j < lines.length; j++) {
+    const obj = {};
+    for (let k = 0; k < headers.length; k++) obj[headers[k]] = lines[j][k] !== undefined ? lines[j][k].trim() : '';
+    result.push(obj);
+  }
+  return result;
+}
+
+function parseCaseInfo(txt) {
+  caseData.meta = {};
+  txt.split('\n').forEach(line => {
+    const parts = line.split(':');
+    if (parts.length >= 2) {
+      const k = parts[0].trim();
+      const v = parts.slice(1).join(':').trim();
+      if (k && !k.startsWith('=')) caseData.meta[k] = v;
+    }
+  });
+}
+
+/* ============================================================================
+   VIEW RENDERERS
+   ============================================================================ */
+function renderOverview() {
+  const container = document.getElementById('overview-metrics');
+  container.innerHTML = '';
+  const metrics = [
+    { label: 'CASE IDENTIFIER', val: caseData.meta['Case Identifier'] || 'N/A', cls: 'highlight-cyan' },
+    { label: 'TARGET HOSTNAME', val: caseData.meta['Target Hostname'] || 'N/A', cls: 'highlight-mint' },
+    { label: 'ACTIVE PROCESSES', val: caseData.processes.length, cls: 'highlight-cyan' },
+    { label: 'RECOVERED VISITS', val: caseData.bVisits.length, cls: 'highlight-mint' },
+    { label: 'RECOVERED DOWNLOADS', val: caseData.bDownloads.length, cls: 'highlight-crimson' },
+    { label: 'DISCOVERED DISKS', val: caseData.disks.length, cls: 'highlight-amber' }
+  ];
+  for (const m of metrics) {
+    const c = document.createElement('div');
+    c.className = 'card';
+    c.innerHTML = `<div class="card-label">${m.label}</div><div class="card-value ${m.cls}">${escapeHTML(String(m.val))}</div>`;
+    container.appendChild(c);
+  }
+  const metaTable = document.getElementById('overview-meta-table');
+  let html = '<table style="margin-top:6px;"><tbody>';
+  for (const [k, v] of Object.entries(caseData.meta)) {
+    html += `<tr><td class="mono" style="width:250px; color:var(--text-muted);">${escapeHTML(k)}</td><td class="mono" style="font-weight:600;">${escapeHTML(v)}</td></tr>`;
+  }
+  html += '</tbody></table>';
+  metaTable.innerHTML = html;
+}
+
+function renderBrowser() {
+  document.getElementById('count-b-visits').textContent = caseData.bVisits.length;
+  document.getElementById('count-b-searches').textContent = caseData.bSearches.length;
+  document.getElementById('count-b-downloads').textContent = caseData.bDownloads.length;
+  document.getElementById('count-b-bookmarks').textContent = caseData.bBookmarks.length;
+  document.getElementById('b-badge-visits').textContent = caseData.bVisits.length;
+  document.getElementById('b-badge-searches').textContent = caseData.bSearches.length;
+  document.getElementById('b-badge-downloads').textContent = caseData.bDownloads.length;
+  document.getElementById('b-badge-bookmarks').textContent = caseData.bBookmarks.length;
+
+  const vBody = document.getElementById('tbody-b-visits');
+  vBody.innerHTML = '';
+  for (const v of caseData.bVisits) {
+    const tr = document.createElement('tr');
+    tr.dataset.search = `${v.Timestamp} ${v.Browser} ${v.URL}`.toLowerCase();
+    tr.innerHTML = `<td class="mono" style="color:var(--primary); font-weight:700; width:170px;">${escapeHTML(v.Timestamp || 'N/A')}</td><td style="font-weight:700;">${escapeHTML(v.Browser || '')}</td><td class="mono" style="max-width:550px; word-break:break-all;">${escapeHTML(v.URL || '')}</td><td><span class="pill pill-dim">${escapeHTML(v.Channel || 'Web Visit')}</span></td>`;
+    vBody.appendChild(tr);
+  }
+  const sBody = document.getElementById('tbody-b-searches');
+  sBody.innerHTML = '';
+  for (const s of caseData.bSearches) {
+    const tr = document.createElement('tr');
+    tr.dataset.search = `${s.Timestamp} ${s.SearchEngine} ${s.Query}`.toLowerCase();
+    tr.innerHTML = `<td class="mono" style="color:var(--text-muted); width:170px;">${escapeHTML(s.Timestamp || 'N/A')}</td><td><span class="pill pill-cyan">${escapeHTML(s.SearchEngine || 'Engine')}</span></td><td style="font-weight:700; color:var(--text-main); font-size:13px;">🔍 "${escapeHTML(s.Query || '')}"</td><td class="mono" style="max-width:400px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text-muted);">${escapeHTML(s.FullURL || '')}</td>`;
+    sBody.appendChild(tr);
+  }
+  const dBody = document.getElementById('tbody-b-downloads');
+  dBody.innerHTML = '';
+  for (const d of caseData.bDownloads) {
+    const tr = document.createElement('tr');
+    tr.dataset.search = `${d.Timestamp} ${d.FileName} ${d.URL} ${d.Browser}`.toLowerCase();
+    const isHigh = (d.Classification || '').includes('HIGH');
+    tr.innerHTML = `<td class="mono" style="color:var(--text-muted); width:170px;">${escapeHTML(d.Timestamp || 'N/A')}</td><td style="font-weight:600;">${escapeHTML(d.Browser || '')}</td><td class="mono" style="font-weight:700; color:${isHigh ? 'var(--danger)' : 'var(--text-main)'};">${escapeHTML(d.FileName || '')}</td><td><span class="pill ${isHigh ? 'pill-crimson' : 'pill-dim'}">${escapeHTML(d.Classification || 'Standard')}</span></td><td class="mono" style="max-width:420px; word-break:break-all; color:var(--text-muted);">${escapeHTML(d.URL || '')}</td>`;
+    dBody.appendChild(tr);
+  }
+  const bmBody = document.getElementById('tbody-b-bookmarks');
+  bmBody.innerHTML = '';
+  for (const bm of caseData.bBookmarks) {
+    const tr = document.createElement('tr');
+    tr.dataset.search = `${bm.Browser} ${bm.Title} ${bm.URL}`.toLowerCase();
+    tr.innerHTML = `<td style="font-weight:700;">${escapeHTML(bm.Browser || '')}</td><td style="font-weight:600;">${escapeHTML(bm.Title || 'Untitled')}</td><td class="mono" style="max-width:550px; word-break:break-all; color:var(--text-muted);">${escapeHTML(bm.URL || '')}</td>`;
+    bmBody.appendChild(tr);
+  }
+}
+
+function switchBrowserSub(type) {
+  currentBrowserSub = type;
+  document.getElementById('btn-sub-bv').classList.toggle('active', type === 'visits');
+  document.getElementById('btn-sub-bs').classList.toggle('active', type === 'searches');
+  document.getElementById('btn-sub-bd').classList.toggle('active', type === 'downloads');
+  document.getElementById('btn-sub-bm').classList.toggle('active', type === 'bookmarks');
+  document.getElementById('sub-b-visits').style.display = type === 'visits' ? '' : 'none';
+  document.getElementById('sub-b-searches').style.display = type === 'searches' ? '' : 'none';
+  document.getElementById('sub-b-downloads').style.display = type === 'downloads' ? '' : 'none';
+  document.getElementById('sub-b-bookmarks').style.display = type === 'bookmarks' ? '' : 'none';
+}
+
+function filterBrowserSub() {
+  const q = document.getElementById('b-search').value.toLowerCase();
+  ['#tbody-b-visits tr', '#tbody-b-searches tr', '#tbody-b-downloads tr', '#tbody-b-bookmarks tr'].forEach(sel => {
+    document.querySelectorAll(sel).forEach(tr => tr.style.display = tr.dataset.search.includes(q) ? '' : 'none');
+  });
+}
+
+function renderHardware() {
+  const container = document.getElementById('power-wifi-cards');
+  container.innerHTML = '';
+  const pwr = caseData.pwrNet.PowerStatus || 'N/A';
+  const wifi = caseData.pwrNet.ActiveWiFi_SSID || 'N/A';
+  const cards = [
+    { label: 'POWER STATUS', val: pwr, cls: 'highlight-mint' },
+    { label: 'CONNECTED WIFI SSID', val: wifi, cls: 'highlight-cyan' },
+    { label: 'SYSTEM UPTIME', val: caseData.os.SystemUptime || 'N/A', cls: 'highlight-amber' },
+    { label: 'INSTALLATION DATE', val: caseData.os.InstallDate || 'N/A', cls: '' }
+  ];
+  for (const c of cards) {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `<div class="card-label">${c.label}</div><div class="card-value ${c.cls}">${escapeHTML(String(c.val))}</div>`;
+    container.appendChild(div);
+  }
+  const tbody = document.getElementById('usb-tbody');
+  tbody.innerHTML = '';
+  for (const u of caseData.usb) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><span class="pill pill-cyan">${escapeHTML(u.DeviceClass || 'Peripheral')}</span></td><td style="font-weight:700;">${escapeHTML(u.DeviceName || '')}</td><td>${escapeHTML(u.FriendlyName || '')}</td><td class="mono" style="color:var(--text-muted); font-size:11px;">${escapeHTML(u.DeviceID || 'N/A')}</td><td><span class="pill pill-mint">${escapeHTML(u.Status || 'OK')}</span></td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+function renderDisks() {
+  const tbody = document.getElementById('disks-tbody');
+  tbody.innerHTML = '';
+  for (const d of caseData.disks) {
+    const tr = document.createElement('tr');
+    const isBoot = d.BootPartition === 'True' || d.BootPartition === true;
+    tr.innerHTML = `<td class="mono" style="font-weight:700;">${escapeHTML(d.PhysicalDrive || '')}</td><td style="font-weight:700; color:var(--text-main);">${escapeHTML(d.DriveModel || '')}</td><td class="mono" style="font-weight:600;">${escapeHTML(d.Size_GB || '0')} GB</td><td><span class="pill pill-dim">${escapeHTML(d.Interface || 'Local')}</span></td><td class="mono">${escapeHTML(d.PartitionName || '')}</td><td><span class="pill pill-dim">${escapeHTML(d.PartitionType || 'NTFS')}</span></td><td><span class="pill ${isBoot ? 'pill-mint' : 'pill-dim'}">${isBoot ? 'PRIMARY BOOT' : 'SECONDARY / DATA'}</span></td><td class="mono" style="font-size:11px; color:var(--text-muted);">${escapeHTML(d.DriveSerial || 'N/A')}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+function renderCommands() {
+  const tbody = document.getElementById('cmd-tbody');
+  tbody.innerHTML = '';
+  for (const c of caseData.commands) {
+    const tr = document.createElement('tr');
+    tr.dataset.search = `${c.UserContext} ${c.Source} ${c.Command}`.toLowerCase();
+    tr.innerHTML = `<td style="font-weight:700;">${escapeHTML(c.UserContext || 'Admin')}</td><td><span class="pill pill-cyan">${escapeHTML(c.Source || 'Console')}</span></td><td class="mono" style="font-weight:600; color:var(--text-main); word-break:break-all;">${escapeHTML(c.Command || '')}</td>`;
+    tbody.appendChild(tr);
+  }
+  document.getElementById('count-cmds').textContent = caseData.commands.length;
+}
+
+function filterCommands() {
+  const q = document.getElementById('cmd-search').value.toLowerCase();
+  document.querySelectorAll('#cmd-tbody tr').forEach(tr => {
+    tr.style.display = tr.dataset.search.includes(q) ? '' : 'none';
+  });
+}
+
+function calculateProcessThreat(p) {
+  let score = 5;
+  const path = (p.ExecutablePath || '').toLowerCase();
+  const cmd = (p.CommandLine || '').toLowerCase();
+  const name = (p.Name || '').toLowerCase();
+  if (!path || path === 'n/a') score += 20;
+  if (path.includes('\\temp\\') || path.includes('\\appdata\\') || path.includes('\\users\\public\\')) score += 45;
+  const sysBins = ['svchost.exe', 'csrss.exe', 'lsass.exe', 'services.exe', 'smss.exe'];
+  if (sysBins.includes(name) && !path.includes('\\system32\\')) score += 65;
+  if (cmd.includes('-enc') || cmd.includes('-encodedcommand') || cmd.includes('downloadstring') || cmd.includes('bypass')) score += 55;
+  if (name === 'certutil.exe' && (cmd.includes('-urlcache') || cmd.includes('-decode'))) score += 60;
+  score = Math.min(100, score);
+  let level = 'LOW';
+  if (score >= 70) level = 'CRITICAL';
+  else if (score >= 45) level = 'HIGH';
+  else if (score >= 25) level = 'MEDIUM';
+  return { score, level };
+}
+
+function renderProcesses() {
+  const tbody = document.getElementById('proc-tbody');
+  tbody.innerHTML = '';
+  let countCrit = 0, countHigh = 0;
+  for (const p of caseData.processes) {
+    const t = calculateProcessThreat(p);
+    if (t.level === 'CRITICAL') countCrit++;
+    if (t.level === 'HIGH') countHigh++;
+    const tr = document.createElement('tr');
+    tr.dataset.threat = t.level.toLowerCase();
+    tr.dataset.search = `${p.Name} ${p.ProcessId} ${p.ExecutablePath} ${p.CommandLine}`.toLowerCase();
+    let pillCls = 'pill-dim';
+    if (t.level === 'CRITICAL') pillCls = 'pill-crimson';
+    else if (t.level === 'HIGH') pillCls = 'pill-amber';
+    tr.innerHTML = `<td class="mono font-bold">${escapeHTML(p.ProcessId || '0')}</td><td class="mono text-muted">${escapeHTML(p.ParentProcessId || '0')}</td><td><span class="pill ${pillCls}">${t.level}</span></td><td style="font-weight:700;">${escapeHTML(p.Name || 'Unknown')}</td><td class="mono" style="max-width:260px; word-break:break-all; color:var(--text-muted);">${escapeHTML(p.ExecutablePath || 'N/A')}</td><td class="mono">${escapeHTML(p.Owner || 'N/A')}</td><td class="mono" style="text-align:right;">${(parseFloat(p.WorkingSetMB) || 0).toFixed(1)}</td><td><button class="btn" style="padding:2px 8px; font-size:11px;" onclick="viewCmdModal('${escapeHTML(p.ProcessId)}')">Payload</button></td>`;
+    tbody.appendChild(tr);
+  }
+  document.getElementById('c-proc-all').textContent = caseData.processes.length;
+  document.getElementById('c-proc-crit').textContent = countCrit;
+  document.getElementById('c-proc-high').textContent = countHigh;
+}
+
+function setProcFilter(lvl) {
+  currentProcFilter = lvl;
+  document.getElementById('btn-proc-all').classList.toggle('active', lvl === 'all');
+  document.getElementById('btn-proc-crit').classList.toggle('active', lvl === 'critical');
+  document.getElementById('btn-proc-high').classList.toggle('active', lvl === 'high');
+  filterProcesses();
+}
+
+function filterProcesses() {
+  const q = document.getElementById('proc-search').value.toLowerCase();
+  document.querySelectorAll('#proc-tbody tr').forEach(tr => {
+    const matchesSearch = tr.dataset.search.includes(q);
+    const matchesLvl = (currentProcFilter === 'all') || (tr.dataset.threat === currentProcFilter);
+    tr.style.display = (matchesSearch && matchesLvl) ? '' : 'none';
+  });
+}
+
+function viewCmdModal(pid) {
+  const p = caseData.processes.find(x => String(x.ProcessId) === String(pid));
+  if (!p) return;
+  const body = `<p><strong>Process Name:</strong> ${escapeHTML(p.Name)} (PID: ${p.ProcessId})</p><p><strong>Executable Path:</strong> ${escapeHTML(p.ExecutablePath)}</p><br><p><strong>Command Line Arguments:</strong></p><div class="terminal-box" style="margin-top:6px;">${escapeHTML(p.CommandLine || 'N/A')}</div>`;
+  showModal(`PROCESS PAYLOAD // PID ${pid}`, body);
+}
+
+function isIPv4(ip) { return /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip); }
+function isIPv6(ip) { return ip && ip.includes(':'); }
+function isPrivateIP(ip) {
+  if (isIPv4(ip)) return /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|0\.0\.0\.0)/.test(ip);
+  if (isIPv6(ip)) return /^(::1|fe80:|fc00:|fd00:)/i.test(ip);
+  return false;
+}
+
+function renderNetwork() {
+  const tbody = document.getElementById('net-tbody');
+  tbody.innerHTML = '';
+  let countV4 = 0, countV6 = 0, countListen = 0;
+  for (let i = 0; i < caseData.sockets.length; i++) {
+    const s = caseData.sockets[i];
+    const rIP = (s.RemoteAddress || '').trim();
+    const lIP = (s.LocalAddress || '').trim();
+    const hasV4 = isIPv4(lIP) || isIPv4(rIP);
+    const hasV6 = isIPv6(lIP) || isIPv6(rIP);
+    if (hasV4) countV4++;
+    if (hasV6) countV6++;
+    if ((s.State || '').toLowerCase() === 'listen') countListen++;
+    const tr = document.createElement('tr');
+    tr.dataset.v4 = hasV4 ? 'true' : 'false';
+    tr.dataset.v6 = hasV6 ? 'true' : 'false';
+    tr.dataset.state = (s.State || '').toLowerCase();
+    tr.dataset.search = `${s.Protocol} ${lIP} ${s.LocalPort} ${rIP} ${s.ProcessName}`.toLowerCase();
+    const canResolve = (isIPv4(rIP) || isIPv6(rIP)) && !isPrivateIP(rIP) && rIP !== '*';
+    tr.innerHTML = `<td><span class="pill ${s.Protocol === 'TCP' ? 'pill-cyan' : 'pill-dim'}">${escapeHTML(s.Protocol)}</span></td><td class="mono">${escapeHTML(lIP || '*')}</td><td class="mono font-bold">${escapeHTML(s.LocalPort || '*')}</td><td class="mono" style="font-weight:700; color:var(--text-main);">${escapeHTML(rIP || '*')}</td><td class="mono text-muted">${escapeHTML(s.RemotePort || '*')}</td><td><span class="pill ${s.State === 'Listen' ? 'pill-amber' : 'pill-mint'}">${escapeHTML(s.State || 'N/A')}</span></td><td style="font-weight:700;">${escapeHTML(s.ProcessName || 'Unknown')} (${escapeHTML(s.OwningProcess || '0')})</td><td id="geo-cell-${i}">${canResolve ? `<button class="btn" style="padding:2px 8px; font-size:10px;" onclick="resolveGeoIP('${rIP}', 'geo-cell-${i}')">🌐 Resolve IP</button>` : `<span class="mono text-muted" style="font-size:11px;">Internal / Private</span>`}</td>`;
+    tbody.appendChild(tr);
+  }
+  document.getElementById('c-net-all').textContent = caseData.sockets.length;
+  document.getElementById('c-net-v4').textContent = countV4;
+  document.getElementById('c-net-v6').textContent = countV6;
+  document.getElementById('c-net-listen').textContent = countListen;
+}
+
+function setNetProto(mode) {
+  currentNetProto = mode;
+  document.getElementById('btn-net-all').classList.toggle('active', mode === 'all');
+  document.getElementById('btn-net-v4').classList.toggle('active', mode === 'ipv4');
+  document.getElementById('btn-net-v6').classList.toggle('active', mode === 'ipv6');
+  document.getElementById('btn-net-listen').classList.toggle('active', mode === 'listen');
+  filterNetwork();
+}
+
+function filterNetwork() {
+  const q = document.getElementById('net-search').value.toLowerCase();
+  document.querySelectorAll('#net-tbody tr').forEach(tr => {
+    const matchesSearch = tr.dataset.search.includes(q);
+    let matchesMode = true;
+    if (currentNetProto === 'ipv4') matchesMode = (tr.dataset.v4 === 'true');
+    else if (currentNetProto === 'ipv6') matchesMode = (tr.dataset.v6 === 'true');
+    else if (currentNetProto === 'listen') matchesMode = (tr.dataset.state === 'listen');
+    tr.style.display = (matchesSearch && matchesMode) ? '' : 'none';
+  });
+}
+
+async function resolveGeoIP(ip, cellId) {
+  const cell = document.getElementById(cellId);
+  cell.innerHTML = '<span class="mono text-muted" style="font-size:10px;">Querying GeoIP...</span>';
+  try {
+    const res = await fetch(`https://ipwho.is/${encodeURIComponent(ip)}`);
+    const data = await res.json();
+    if (data.success) {
+      const isp = data.connection?.isp || data.connection?.org || 'Verified Provider';
+      const loc = `${data.country || 'Global'}, ${data.city || 'DC'}`;
+      cell.innerHTML = `<span class="pill pill-mint" title="${isp} (${data.connection?.asn || ''})">${loc} // ${isp}</span>`;
+    } else {
+      cell.innerHTML = `<span class="mono text-muted" style="font-size:10px;">Unresolved</span>`;
+    }
+  } catch (err) {
+    cell.innerHTML = `<span class="mono text-muted" style="font-size:10px;">Offline</span>`;
+  }
+}
+
+function renderEmail() {
+  const tbody = document.getElementById('email-tbody');
+  tbody.innerHTML = '';
+  for (const m of caseData.email) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="font-weight:700;">${escapeHTML(m.Client || '')}</td><td><span class="pill pill-cyan">${escapeHTML(m.FileType || '')}</span></td><td class="mono" style="font-weight:700;">${escapeHTML(m.FileName || '')}</td><td class="mono">${escapeHTML(m.Size_MB || '0')} MB</td><td class="mono text-muted" style="max-width:380px; word-break:break-all;">${escapeHTML(m.Path || '')}</td><td class="mono text-muted">${escapeHTML(m.LastModified || '')}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+function renderUsers() {
+  const tbody = document.getElementById('users-tbody');
+  tbody.innerHTML = '';
+  for (const u of caseData.users) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="font-weight:700;">${escapeHTML(u.Username || '')}</td><td class="mono text-muted">${escapeHTML(u.Domain || '')}</td><td class="mono text-muted" style="font-size:11px;">${escapeHTML(u.SID || '')}</td><td><span class="pill ${u.Disabled === 'True' ? 'pill-crimson' : 'pill-mint'}">${u.Disabled === 'True' ? 'YES' : 'NO'}</span></td><td class="mono">${escapeHTML(u.PasswordRequired || 'True')}</td><td class="mono" style="color:var(--primary); font-weight:600;">${escapeHTML(u.PasswordLastSet || 'N/A')}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+function renderPersistence() {
+  const rBody = document.getElementById('run-tbody');
+  rBody.innerHTML = '';
+  for (const r of caseData.runs) {
+    const tr = document.createElement('tr');
+    tr.dataset.search = `${r.HiveKey} ${r.EntryName} ${r.CommandPath}`.toLowerCase();
+    tr.innerHTML = `<td class="mono text-muted">${escapeHTML(r.HiveKey)}</td><td style="font-weight:700;">${escapeHTML(r.EntryName)}</td><td class="mono" style="word-break:break-all;">${escapeHTML(r.CommandPath)}</td>`;
+    rBody.appendChild(tr);
+  }
+  document.getElementById('c-run').textContent = caseData.runs.length;
+  const sBody = document.getElementById('svc-tbody');
+  sBody.innerHTML = '';
+  for (const s of caseData.services) {
+    const tr = document.createElement('tr');
+    tr.dataset.search = `${s.Name} ${s.DisplayName} ${s.PathName}`.toLowerCase();
+    tr.innerHTML = `<td class="mono font-bold">${escapeHTML(s.Name)}</td><td>${escapeHTML(s.DisplayName)}</td><td><span class="pill pill-dim">${escapeHTML(s.State)}</span></td><td class="mono">${escapeHTML(s.StartMode)}</td><td class="mono text-muted" style="max-width:280px; word-break:break-all;">${escapeHTML(s.PathName)}</td>`;
+    sBody.appendChild(tr);
+  }
+  document.getElementById('c-svc').textContent = caseData.services.length;
+}
+
+function switchPersistSub(type) {
+  document.getElementById('btn-sub-r').classList.toggle('active', type === 'run');
+  document.getElementById('btn-sub-s').classList.toggle('active', type === 'svc');
+  document.getElementById('sub-persist-run').style.display = type === 'run' ? '' : 'none';
+  document.getElementById('sub-persist-svc').style.display = type === 'svc' ? '' : 'none';
+}
+
+function filterPersistence() {
+  const q = document.getElementById('persist-search').value.toLowerCase();
+  document.querySelectorAll('#run-tbody tr, #svc-tbody tr').forEach(tr => tr.style.display = tr.dataset.search.includes(q) ? '' : 'none');
+}
+
+function renderEvents() {
+  const tbody = document.getElementById('evt-tbody');
+  tbody.innerHTML = '';
+  for (let i = 0; i < caseData.events.length; i++) {
+    const e = caseData.events[i];
+    const tr = document.createElement('tr');
+    tr.dataset.search = `${e.LogName} ${e.Id} ${e.Level} ${e.Provider} ${e.Message}`.toLowerCase();
+    tr.innerHTML = `<td class="mono text-muted">${escapeHTML(e.TimeCreated)}</td><td class="mono font-bold">${escapeHTML(e.LogName)}</td><td class="mono">${escapeHTML(String(e.Id))}</td><td><span class="pill pill-dim">${escapeHTML(e.Level)}</span></td><td class="mono text-muted">${escapeHTML(e.Provider)}</td><td style="max-width:320px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(e.Message)}</td><td><button class="btn" style="padding:2px 8px; font-size:10px;" onclick="viewEventModal(${i})">Inspect</button></td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+function filterEvents() {
+  const q = document.getElementById('evt-search').value.toLowerCase();
+  document.querySelectorAll('#evt-tbody tr').forEach(tr => tr.style.display = tr.dataset.search.includes(q) ? '' : 'none');
+}
+
+function viewEventModal(idx) {
+  const e = caseData.events[idx];
+  if (!e) return;
+  const body = `<p><strong>Channel:</strong> ${escapeHTML(e.LogName)} | <strong>Event ID:</strong> ${e.Id}</p><p><strong>Timestamp:</strong> ${escapeHTML(e.TimeCreated)}</p><br><div class="terminal-box">${escapeHTML(e.Message)}</div>`;
+  showModal(`EVENT LOG ${e.Id}`, body);
+}
+
+async function verifyIntegrity() {
+  const tbody = document.getElementById('integrity-tbody');
+  tbody.innerHTML = '';
+  let matches = 0, mismatches = 0;
+  for (const item of caseData.manifest) {
+    const fileName = item.FileName;
+    const relPath = item.RelativePath || item.FileName;
+    const expected = (item.SHA256 || '').toLowerCase().trim();
+    let calculated = 'FILE_NOT_FOUND';
+    let statusPill = '<span class="pill pill-crimson">MISSING</span>';
+    const file = rawFilesMap.get(fileName) || rawFilesMap.get(relPath);
+    if (file) {
+      try {
+        const buffer = await file.arrayBuffer();
+        const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+        calculated = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+        if (calculated === expected) { matches++; statusPill = '<span class="pill pill-mint">PASS</span>'; }
+        else { mismatches++; statusPill = '<span class="pill pill-crimson">FAIL</span>'; }
+      } catch (err) { calculated = 'ERROR: ' + err.message; }
+    } else mismatches++;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="mono font-bold">${escapeHTML(relPath)}</td><td class="mono text-muted">${item.SizeBytes || '0'} B</td><td class="mono text-muted" style="font-size:10px;">${escapeHTML(expected)}</td><td class="mono" style="font-size:10px; color:${calculated === expected ? 'var(--success)' : 'var(--danger)'};">${escapeHTML(calculated)}</td><td>${statusPill}</td>`;
+    tbody.appendChild(tr);
+  }
+  const hudIntegrity = document.getElementById('hud-integrity-status');
+  const banner = document.getElementById('integrity-banner');
+  if (mismatches === 0 && matches > 0) {
+    hudIntegrity.textContent = 'VERIFIED (PASS)'; hudIntegrity.className = 'mono highlight-mint';
+    banner.innerHTML = `<div class="card" style="border-left:4px solid var(--success); background:#f0fdf4;"><div class="card-value highlight-mint" style="font-size:13px;">EVIDENCE INTEGRITY CONFIRMED</div><p style="font-size:12px; color:var(--text-muted); margin-top:2px;">All ${matches} manifest artifacts match Web Crypto SHA-256 signatures (ISO/IEC 27037:2012 tamper-evident compliance).</p></div>`;
+  } else {
+    hudIntegrity.textContent = 'TAMPERED / MISMATCH'; hudIntegrity.className = 'mono highlight-crimson';
+    banner.innerHTML = `<div class="card" style="border-left:4px solid var(--danger); background:#fef2f2;"><div class="card-value highlight-crimson" style="font-size:13px;">INTEGRITY WARNING // HASH MISMATCH DETECTED</div></div>`;
+  }
+}
+
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+function showModal(title, body) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = body;
+  document.getElementById('detailModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('detailModal').classList.remove('open'); }
+
+function sortTable(tableId, colIndex, isNumeric = false) {
+  const table = document.getElementById(tableId);
+  const tbody = table.querySelector('tbody');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const currentDir = table.getAttribute('data-sort-dir') === 'asc' ? 'desc' : 'asc';
+  table.setAttribute('data-sort-dir', currentDir);
+  rows.sort((a, b) => {
+    const aText = a.cells[colIndex] ? a.cells[colIndex].textContent.trim() : '';
+    const bText = b.cells[colIndex] ? b.cells[colIndex].textContent.trim() : '';
+    if (isNumeric) return currentDir === 'asc' ? (parseFloat(aText)||0) - (parseFloat(bText)||0) : (parseFloat(bText)||0) - (parseFloat(aText)||0);
+    return currentDir === 'asc' ? aText.localeCompare(bText) : bText.localeCompare(aText);
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+</script>
+</body>
+</html>
