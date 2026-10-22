@@ -1,15 +1,13 @@
 
-
 <div align="center">
 
-# ⚡ CHW TraceX ⚡
-### Live Host Forensic Triage & Rapid Evidence Acquisition Framework
+# 🛡️ CHW TRACEX 🛡️
+### **Next-Gen Live Host Forensic Triage & Evidence Acquisition Framework**
 
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011%20%7C%20Server-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://microsoft.com)
-[![Framework](https://img.shields.io/badge/Framework-CHW%20TraceX-red?style=for-the-badge&logo=powershell&logoColor=white)](https://github.com)
-[![Forensics](https://img.shields.io/badge/Compliance-ISO%2FIEC%2027037%20%7C%20RFC%203227-success?style=for-the-badge)](https://www.iso.org)
-[![Author](https://img.shields.io/badge/Developed%20By-Mr.%20Dheeraj%20Kumar-orange?style=for-the-badge)](https://instagram.com/CyberHunterWarrior)
-[![Organization](https://img.shields.io/badge/Organization-Cyber%20Hunter%20Warrior-black?style=for-the-badge)](https://instagram.com/CyberHunterWarrior)
+[![Developed By](https://img.shields.io/badge/Architect-Mr.%20Dhiraj%20Kumar-FF5722?style=for-the-badge&logo=github&logoColor=white)](https://instagram.com/CyberHunterWarrior)
+[![Organization](https://img.shields.io/badge/Org-CYBER%20HUNTER%20WARRIOR-000000?style=for-the-badge&logo=security&logoColor=white)](https://instagram.com/CyberHunterWarrior)
+[![Integrity](https://img.shields.io/badge/Integrity-SHA--256%20Cryptographic%20Verified-2E7D32?style=for-the-badge)](https://github.com)
 
 <br/>
 
@@ -20,148 +18,154 @@
 ██║     ██╔══██║██║███╗██║       ██║   ██╔══██╗██╔══██║██║     ██╔══╝   ██╔██╗ 
 ╚██████╗██║  ██║╚███╔███╔╝       ██║   ██║  ██║██║  ██║╚██████╗███████╗██╔╝ ██╗
  ╚═════╝╚═╝  ╚═╝ ╚══╝╚══╝        ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝╚═╝  ╚═╝
+```
 
-Automated, Non-Destructive, Order-of-Volatility Preserving Live Host Digital
-Forensic Acquisition Framework
-Built for Incident Responders, Law Enforcement, Threat Hunters, and DFIR
-Practitioners.
+### **Automated • Non-Destructive • Courtroom-Grade Live Host Forensics**
 
-🌐 Official Website • 📸 Instagram • 📺 YouTube • 🚀 Quick Start • 📜 Pipeline
-Architecture
+**CHW TraceX** is an enterprise-grade forensic acquisition framework engineered for **Incident Responders, Cyber Forensic Investigators, and Law Enforcement Agencies** to instantly extract volatile artifacts without altering system state.
 
-📌 Overview
+---
 
-CHW TraceX is an enterprise-grade digital forensic acquisition framework
-engineered by Cyber Hunter Warrior. Designed to streamline live host triage
-operations, TraceX executes a comprehensive, automated 20-stage forensic
-collection pipeline across active Windows endpoints.
+[🌐 Official Website](#-connect-with-cyber-hunter-warrior) • [📸 Instagram](https://instagram.com/CyberHunterWarrior) • [📺 YouTube](https://youtube.com/@CyberHunterWarrior) • [📥 How to Download](#-quick-download--execution-guide) • [🔎 Forensic Capabilities](#-forensic-capabilities--evidence-matrix)
 
-Operating under strict read-only parameters, it strictly adheres to:
+---
 
-  - RFC 3227 guidelines on forensic Order of Volatility (capturing volatile
-    memory, network sockets, active processes, and ephemeral artifacts before
-    persistent disk stores).
-  - ISO/IEC 27037:2012 international standards for identification, collection,
-    acquisition, and preservation of digital evidence.
-  - Immediate, post-acquisition SHA-256 cryptographic verification generated for
-    all acquired artifacts to guarantee chain of custody and evidentiary
-    integrity.
+</div>
 
-⚡ Key Highlights
+## 🎯 **What is CHW TraceX?**
 
-  - 🛡️ Zero External Dependency: Built leveraging native Windows APIs, CIM/WMI
-    subsystems, and PowerShell execution engines.
-  - ⏱️ Ultra-Fast Live Triage: Full artifact acquisition completes in minutes
-    with real-time CLI progress bars.
-  - 🔍 Deep WebKit & Chromium Carving: Direct byte-level extraction of URLs,
-    search terms, and timestamps even if browsers are locked.
-  - 🔐 Cryptographic Evidence Manifest: Automatic end-to-end SHA-256 hash
-    generation for courtroom-ready verification.
-  - 📊 Instant Workspace Report: Automatically launches an interactive index.html
-    analytical dashboard upon collection.
+When a cyber incident or breach occurs, **volatile evidence vanishes within minutes** if a machine restarts or shuts down. **CHW TraceX** automates the entire host-triage process in strict compliance with **RFC 3227 (Order of Volatility)** and global digital evidence preservation standards.
 
-🔬 20-Stage Forensic Acquisition Pipeline
+It captures live memory structures, deep browser databases, hidden payloads, persistence hooks, and network connections in an automated 20-stage pipeline, automatically locking everything with **SHA-256 cryptographic hashes**.
 
-| Stage  | Artifact Target                     | Output Format | Forensic Significance                                              |
-| :----: | :---------------------------------- | :-----------: | :----------------------------------------------------------------- |
-| **01** | Evidence Manifest                   | `.txt`        | Case metadata, lead responder, host target & start timestamps      |
-| **02** | Privacy & Legal Compliance Charter  | `.txt`        | RFC 3227 / ISO 27037 chain-of-custody governing protocol           |
-| **03** | Host Info & User Token Context      | `.txt`        | `systeminfo`, `hostname`, `whoami /all` security identifiers       |
-| **04** | OS Metrics & Boot Geometry          | `.json`       | Last boot time, system uptime, hardware memory, BIOS details       |
-| **05** | Physical Drives & Boot Geometry     | `.csv`        | Secondary SSDs, partitions, serials, and drive interfaces          |
-| **06** | Connected Peripherals & USB Audits  | `.csv`        | PnP entities, external drives, keyboards, mice, Bluetooth items    |
-| **07** | Power State & Network Interfaces    | `.json`       | Battery charge state, active Wi-Fi SSIDs, MACs & IP routing tables |
-| **08** | Multi-User Command History & RunMRU | `.csv`        | Multi-user PowerShell history logs & Explorer Run dialog MRU       |
-| **09** | Live Processes & Parentage Tree     | `.csv`        | Active PIDs, PPIDs, command-line arguments & memory working sets   |
-| **10** | Windows Services & Binaries         | `.csv`        | Service state, launch modes, binary executable paths               |
-| **11** | Network Sockets & Sockets-to-PID    | `.csv`        | Active IPv4/IPv6 TCP/UDP listening & established connections       |
-| **12** | Auto-Run Registry Persistence       | `.csv`        | Registry Run & RunOnce autorun execution paths                     |
-| **13** | User Accounts & Security Attributes | `.csv`        | Local usernames, SIDs, lockout states & password age               |
-| **14** | Carved Browser History              | `.csv`        | Chrome, Edge, Brave, Opera & Firefox URL history                   |
-| **15** | Carved Search Engine Queries        | `.csv`        | Extracted search keywords from Google, Bing, YouTube, etc.         |
-| **16** | Downloaded Payloads & MOTW          | `.csv`        | Browser downloads + Zone.Identifier ADS origin parsing             |
-| **17** | Bookmarks Extraction                | `.csv`        | Extracted bookmarks from Chromium trees                            |
-| **18** | Local Email Storage Artifacts       | `.csv`        | Outlook `.ost`/`.pst` and Mozilla Thunderbird profiles             |
-| **19** | Windows Event Logs                  | `.json`       | Targeted Security, System & Application event telemetry            |
-| **20** | Cryptographic SHA-256 Manifest      | `.csv`        | Cryptographic hashes & byte sizes of all extracted evidence        |
+---
 
-📂 Evidence Vault Directory Structure
+## 🔬 **Forensic Capabilities & Evidence Matrix**
 
-Once executed, evidence is safely structured under:
+| Forensic Area | 🔍 What CHW TraceX Extracts | 🛡️ Investigation & Triage Value |
+| :--- | :--- | :--- |
+| **System & Hardware Geometry** | Target Hostname, Uptime, Hardware Metrics, Boot Sector & BIOS details | Identifies OS configuration, architecture, and baseline system state. |
+| **Physical & Boot Drives** | Physical drives, secondary NVMe/SSDs, hidden partitions, drive serial numbers | Detects unmounted partitions, secondary drives, and evidence tampering. |
+| **Peripherals & USB Tracking** | Connected USB flash drives, HID devices, mice, keyboards, Bluetooth hardware | Spots rogue hardware, BadUSBs, unauthorized external pendrives, or exfiltration media. |
+| **Active Network Sockets** | Live IPv4/IPv6 TCP/UDP connections mapped directly to owning Process IDs (PIDs) | Exposes Command & Control (C2) beacons, reverse shells, and malicious outbound traffic. |
+| **Live Process Trees** | Active processes, parentage (PPID to PID), full command lines, and memory usage | Catches process hollowing, living-off-the-land binaries (LOLBins), and hidden malware. |
+| **Command History & RunMRU** | Multi-user PowerShell history logs (`ConsoleHost_history`) + Windows Run Box MRU | Reveals the exact interactive commands and payloads typed by an attacker or user. |
+| **Persistence & Auto-Runs** | Auto-start execution points (`HKLM` & `HKCU` Run / RunOnce registry keys) | Uncovers startup persistence hooks used by malware to survive host reboots. |
+| **User Accounts & Privileges** | Local usernames, SIDs, lockout state, password policies, and password age | Identifies backdoor accounts, privilege escalation, and lateral movement footprints. |
+| **Deep Browser Carving** | History & search keywords carved directly from Chrome, Edge, Brave, Opera, Firefox | Recovers visited malicious URLs, threat research, and search queries at byte-level. |
+| **Payload & Download Audit** | Carved browser downloads + NTFS `Zone.Identifier` (Mark-of-the-Web ADS) | Identifies initial attack vectors, downloaded phishing attachments, and droppers. |
+| **Email Storage Stores** | Locates Microsoft Outlook `.ost` / `.pst` caches and Mozilla Thunderbird profiles | Quickly pinpoints corporate communications, phishing emails, and local mail stores. |
+| **Windows Event Logs** | Deep query of core `Security`, `System`, and `Application` event records | Detects brute-force logins, service installations, and clear-log attempts. |
+| **Cryptographic Manifest** | Automated post-acquisition **SHA-256 hashing** of every single carved artifact | Guarantees **Chain of Custody** and evidentiary authenticity of the acquired artifacts. |
 
-reports/
-└── [Case_Name]_[Timestamp]/
-    ├── Browser_Artifacts/
-    │   ├── Google_Chrome_History.sqlite
-    │   └── Microsoft_Edge_History.sqlite
-    ├── Case_Information.txt
-    ├── Privacy_Policy_Compliance.txt
-    ├── System_Information.txt
-    ├── Operating_System.json
-    ├── Physical_Disks_Boot_Drives.csv
-    ├── USB_All_Connected_Devices.csv
-    ├── Power_Network_Interfaces.json
-    ├── Recent_Commands_History.csv
-    ├── Processes.csv
-    ├── Services.csv
-    ├── Network_Connections.csv
-    ├── Registry_Persistence.csv
-    ├── User_Accounts_Security.csv
-    ├── Browser_History.csv
-    ├── Browser_Searches.csv
-    ├── Browser_Downloads.csv
-    ├── Browser_Bookmarks.csv
-    ├── Email_Client_Artifacts.csv
-    ├── Event_Logs.json
-    ├── Collection_Log.txt
-    └── SHA256_Manifest.csv
+---
 
-🚀 Installation & Execution
+## 📥 **Quick Download & Execution Guide**
 
-Prerequisites
+### **Prerequisites:**
+- **OS:** Windows 10, Windows 11, or Windows Server (64-bit)
+- **Privilege:** Administrator rights *(Mandatory to access raw memory, event logs, and system registries)*
 
-  - Windows 10, 11, or Windows Server (x64)
-  - PowerShell 5.1+ (Native to modern Windows)
-  - Administrative Privileges (Required for complete memory, event log, and
-    low-level registry carving)
+---
 
-Step 1: Clone Repository
+### **Option 1: Download via Git (Recommended)**
 
+```powershell
+# Step 1: Clone the official repository
 git clone https://github.com/YourUsername/CHW-TraceX.git
+
+# Step 2: Navigate into the tool directory
 cd CHW-TraceX
+```
 
-(Alternatively, download the latest Release .zip and extract it).
+---
 
-Step 2: Run with Elevated Privileges
+### **Option 2: Direct ZIP Download**
+1. Click the green **`<> Code`** button at the top right of this repository.
+2. Select **`Download ZIP`**.
+3. Extract the downloaded `.zip` file on your target machine.
 
-1.  Right-click on CHW_TraceX.bat (or your runner script).
-2.  Select "Run as Administrator".
-3.  Follow the on-screen prompts to configure your Case Parameters:
-      - Case Name (e.g., INCIDENT_042)
-      - Lead Investigator (e.g., Dheeraj_Kumar)
-      - Case Reference ID (e.g., REF-2026-CHW)
-      - Evidence Summary
+---
 
-Step 3: Review Results
+### **🚀 How to Run:**
 
-Upon completion, CHW TraceX will automatically finalize the cryptographic
-integrity catalog and launch the analysis workspace (index.html) in your default
-browser.
+1. Open the folder and **Right-Click** on `CHW_TraceX.bat`.
+2. Select **"Run as administrator"**.
+3. Fill in your incident details in the interactive prompt:
+   - **Case Name** *(e.g., `APT_Investigation_01`)*
+   - **Lead Investigator** *(e.g., `Dhiraj_Kumar`)*
+   - **Case Reference ID** *(e.g., `TICKET-9921`)*
+   - **Evidence Summary** *(e.g., `Live_Host_Triage`)*
+4. **Automated Analysis:** The 20-stage pipeline will acquire all artifacts, calculate SHA-256 hashes for evidence protection, and immediately open your **`index.html`** forensic dashboard in your browser.
 
-⚖️ Legal & Ethical Notice
+---
 
-WARNING & DISCLAIMER:
-This framework is developed strictly for authorized Digital Forensics and Incident Response (DFIR),
-threat hunting operations, corporate incident containment, and authorized academic research.
-CYBER HUNTER WARRIOR and the author disclaim all liability for unauthorized, malicious,
-or unlawful deployment of this tool. Ensure you possess written authorization before executing
-on non-consenting enterprise infrastructure.
+## 🗂️ **Generated Evidence Vault**
 
-👨‍💻 Developer & Leadership
+All carved intelligence is systematically stored in an isolated, tamper-evident case folder:
 
-🌐 Connect with Cyber Hunter Warrior
+```text
+📁 reports/
+   └── 📁 [Case_Name]_[Timestamp]/
+       ├── 📁 Browser_Artifacts/           <- Raw SQLite DBs & WAL journals
+       ├── 📄 Case_Information.txt         <- Investigator & host baseline metadata
+       ├── 📄 Privacy_Policy_Compliance.txt <- Legal compliance & data governance charter
+       ├── 📄 System_Information.txt       <- Raw systeminfo & whoami security tokens
+       ├── 📄 Operating_System.json        <- Hardware, uptime & boot geometry
+       ├── 📊 Physical_Disks_Boot_Drives.csv <- Disks, secondary SSDs & partitions
+       ├── 📊 USB_All_Connected_Devices.csv <- Connected USBs, HID & peripherals
+       ├── 📄 Power_Network_Interfaces.json <- WiFi SSIDs, battery state & MACs
+       ├── 📊 Recent_Commands_History.csv  <- Multi-user PowerShell history & RunMRU
+       ├── 📊 Processes.csv                <- Running processes, parentage & CLI args
+       ├── 📊 Services.csv                 <- Windows services & binary paths
+       ├── 📊 Network_Connections.csv      <- Live TCP/UDP sockets mapped to PIDs
+       ├── 📊 Registry_Persistence.csv     <- Registry Run/RunOnce persistence keys
+       ├── 📊 User_Accounts_Security.csv   <- Local user accounts, SIDs & password age
+       ├── 📊 Browser_History.csv          <- Carved browsing history
+       ├── 📊 Browser_Searches.csv         <- Carved search queries
+       ├── 📊 Browser_Downloads.csv        <- Carved downloaded files & URLs
+       ├── 📊 Browser_Bookmarks.csv        <- Extracted user bookmarks
+       ├── 📊 Email_Client_Artifacts.csv   <- Outlook & Thunderbird email stores
+       ├── 📄 Event_Logs.json              <- Security & System event telemetry
+       ├── 📄 Collection_Log.txt           <- Execution timestamp audit trail
+       └── 📊 SHA256_Manifest.csv          <- Cryptographic integrity verification
+```
 
-Stay tuned for our latest threat research, digital forensic workshops, and
-cybersecurity tools:
+---
 
-Website Instagram YouTube
+## ⚖️ **Legal Compliance & Ethical Charter**
+
+> **LEGAL NOTICE & DISCLAIMER:**  
+> This framework is developed strictly for **authorized Digital Forensics & Incident Response (DFIR)** operations, lawful cyber investigations, threat hunting, and academic research.  
+> **CYBER HUNTER WARRIOR** and **Mr. Dhiraj Kumar** accept no liability for any unauthorized, malicious, or unlawful deployment of this tool. Always ensure explicit, written authorization before executing on enterprise infrastructure.
+
+---
+
+## 👨‍💻 **Architect & Leadership**
+
+<div align="center">
+
+### **Mr. Dhiraj Kumar**
+**Chief Executive Officer (CEO) & Chief Security Architect**  
+**CYBER HUNTER WARRIOR**  
+*Specialized in Offensive Security, Digital Forensics & Incident Response (DFIR)*
+
+</div>
+
+---
+
+## 🌐 **Connect with Cyber Hunter Warrior**
+
+Stay connected with us for cutting-edge DFIR tools, threat intel research, and ethical hacking training:
+
+<div align="center">
+
+[![Website](https://img.shields.io/badge/Official_Website-Cyber_Hunter_Warrior-0A66C2?style=for-the-badge&logo=google-chrome&logoColor=white)](https://cyberhunterwarrior.com)
+[![Instagram](https://img.shields.io/badge/Instagram-@CyberHunterWarrior-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://instagram.com/CyberHunterWarrior)
+[![YouTube](https://img.shields.io/badge/YouTube-Cyber_Hunter_Warrior-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com/@CyberHunterWarrior)
+
+<br/>
+
+**CYBER HUNTER WARRIOR — Defending Cyberspace with Precision**
+
+<sub>Copyright © CYBER HUNTER WARRIOR. All Rights Reserved. Designed & Developed by Mr. Dhiraj Kumar.</sub>
